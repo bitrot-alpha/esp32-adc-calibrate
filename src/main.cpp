@@ -102,7 +102,7 @@ void loop() {
           #ifndef EXT_DAC
           dac_output_voltage(DAC_CHANNEL_1, (i & 0xff));
           #else
-          dac_ext.setVoltage( ( (i & 0xFF) << 4 ) + 0xf, false);
+          dac_ext.setVoltage( ( (i & 0xFF) << 4 ) | 0xf, false);
           #endif
           delayMicroseconds(100);
           Results[i*16]=0.9*Results[i*16] + 0.1*analogRead(ADC_PIN);

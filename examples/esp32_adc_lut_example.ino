@@ -285,7 +285,7 @@ void setup() {
     dac_output_enable(DAC_CHANNEL_1);        // Enable DAC on pin 25
     dac_output_voltage(DAC_CHANNEL_1, 0);    // Setup output voltage to 0
     analogReadResolution(12);
-    Serial.begin(500000);
+    Serial.begin(460800);
     while (!Serial) {}
 }
 
