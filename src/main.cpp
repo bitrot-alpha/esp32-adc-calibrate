@@ -39,11 +39,11 @@
 #define SDA_PIN 39
 #define SCL_PIN 40
 #define EXT_DAC_ADDR 0x60
+Adafruit_MCP4725 dac_ext;
 #else
 #define ADC_PIN 35  // GPIO 35 = A7, uses any valid Ax pin as you wish
 #endif
 
-Adafruit_MCP4725 dac_ext;
 
 float Results[4097];
 float Res2[4096*5];
@@ -170,7 +170,7 @@ void loop() {
         #ifndef EXT_DAC
         dac_output_voltage(DAC_CHANNEL_1, (i & 0xff));
         #else
-        dac_ext.setVoltage( ( (i & 0xff) << 4) + 0xf, false);
+        dac_ext.setVoltage( ( (i & 0xff) << 4) | 0xf, false);
         #endif
         delayMicroseconds(100);
         //Serial.print(i*16); Serial.print(" "); Serial.println(r);
