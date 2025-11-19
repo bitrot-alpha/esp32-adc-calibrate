@@ -165,8 +165,8 @@ void loop() {
     digitalWrite(LED_BUILTIN, 0);
     
     //while(1) {
-    float r;
-      for (int i=2; i<256; i++) {
+    unsigned int r;
+      for (int i=0; i<256; i++) {
         #ifndef EXT_DAC
         dac_output_voltage(DAC_CHANNEL_1, (i & 0xff));
         #else
@@ -175,7 +175,7 @@ void loop() {
         delayMicroseconds(100);
         //Serial.print(i*16); Serial.print(" "); Serial.println(r);
         r = Results[analogRead(ADC_PIN)];
-        Serial.printf(">volt:%d\n>ADC:%f\n", (i*16), r);
+        Serial.printf(">out (DAC):%d\n>in (ADC):%d\n", (i*16), r);
       }
     //}
     while (1)
