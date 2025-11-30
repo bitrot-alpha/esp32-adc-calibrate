@@ -4,17 +4,31 @@
 // Based on original work from Helmut Weber (https://github.com/MacLeod-D/ESP32-ADC)
 // that he described at https://esp32.com/viewtopic.php?f=19&t=2881&start=30#p47663
 // Modified with bug-fixed by Henry Cheung
+// Add Teleplot functionality by bitrot_alpha
 //
 // Build a ESP32 ADC Lookup table to correct ESP32 ADC linearity issue
 // Run this sketch to build your own LUT for each of your ESP32, copy and paste the
 // generated LUT to your sketch for using it, see example sketch on how to use it
 //
+// Version 2.1 - fix some oddities, improve graphing using Teleplot
 // Version 2.0 - switch to use analogRead() instead of esp-idf function adcStart()
 // Version 1.0 - original adoptation and bug fix based on Helmut Weber code
 
 // #define GRAPH      // uncomment this for print on Serial Plotter
-#define FLOAT_LUT     // uncomment this if you need float LUT
+// #define FLOAT_LUT  // uncomment this if you need float LUT
 #define ADC_PIN 35    // GPIO 35 = A7, uses any valid Ax pin as you wish
+#define GRAPH_BUTTON 0// GPIO0 on most ESP32 boards is the "BOOT" built-in button
+// #define LED_ENABLE  // uncomment this if your board has a built-in LED
+
+// Graphing with Teleplot
+/*
+    Please open Teleplot on PlatformIO before running the program.
+    Alien->Quick Access->Miscellaneous->Serial & UDP Plotter
+    Settings: your COM/tty port for ESP32, baud 460800
+    Press the round blue button with the "<" to open serial log.
+    Once the onboard LED on the ESP32 dev board illuminates, graph data is ready.
+    Press BOOT/PRG button on the board to begin output.
+*/
 
 float Results[4097];
 float Res2[4096*5];
@@ -44,8 +58,10 @@ void dumpRes2() {
 void setup() {
     dac_output_enable(DAC_CHANNEL_1);    // pin 25
     dac_output_voltage(DAC_CHANNEL_1, 0);
+
+    Serial.begin(460800);
+
     analogReadResolution(12);
-    Serial.begin(500000);
     delay(1000);
 }
 
@@ -105,14 +121,33 @@ void loop() {
     }
 
 #ifdef GRAPH
+    //indicate that we're ready to output graph data
+    #ifdef LED_ENABLE
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, 1);
+    #endif
+    pinMode(GRAPH_BUTTON, INPUT_PULLUP);
+    Serial.println("Press PRG/BOOT button on ESP32 to graph!");
+    while(digitalRead(GRAPH_BUTTON)) {
+      delay(125);
+    }
+    #ifdef LED_ENABLE
+    digitalWrite(LED_BUILTIN, 0);
+    #endif
 
-    while(1) {
-      for (int i=2; i<256; i++) {
+    //while(1) {
+    float r;
+      for (int i=0; i<256; i++) {
         dac_output_voltage(DAC_CHANNEL_1, (i & 0xff));
         delayMicroseconds(100);
-        float r = Results[analogRead(ADC_PIN)];
-        Serial.print(i*16); Serial.print(" "); Serial.println(r);
+        //Serial.print(i*16); Serial.print(" "); Serial.println(r);
+        r = Results[analogRead(ADC_PIN)];
+        Serial.printf(">out (DAC):%d\n>in (ADC):%d\n", (i*16), r);
       }
+    //}
+    while (1)
+    {
+      delay(125);
     }
 
 #else
